@@ -14,7 +14,7 @@ namespace ECommerceAPI.Persistance
             get
             {
                 ConfigurationManager configurationManager = new();
-                configurationManager.SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../../ECommerceAPI.WebAPI"));
+                configurationManager.SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../../ECommerceAPI/ECommerceAPI.WebAPI"));
                 configurationManager.AddJsonFile("appsettings.json");
                 return configurationManager.GetConnectionString("PostreSql");
             }
