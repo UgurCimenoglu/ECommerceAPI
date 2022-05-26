@@ -1,8 +1,11 @@
 ﻿using ECommerceAPI.Application.Repositories.CustomerRepository;
 using ECommerceAPI.Application.Repositories.OrderRepository;
 using ECommerceAPI.Application.Repositories.ProductRepository;
+using ECommerceAPI.Application.ViewModels.Product;
+using ECommerceAPI.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace ECommerceAPI.WebAPI.Controllers
 {
@@ -12,39 +15,57 @@ namespace ECommerceAPI.WebAPI.Controllers
     {
         private readonly IProductReadRepository _productReadRepository;
         private readonly IProductWriteRepository _productWriteRepository;
-        private readonly ICustomerWriteRepository _customerWriteRepository;
-        private readonly IOrderWriteRepository _orderWriteRepository;
-        private readonly IOrderReadRepository _orderReadRepository;
 
 
-        public ProductsController(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository, ICustomerWriteRepository customerWriteRepository, IOrderWriteRepository orderWriteRepository, IOrderReadRepository orderReadRepository)
+
+        public ProductsController(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository)
         {
             _productReadRepository = productReadRepository;
             _productWriteRepository = productWriteRepository;
-            _customerWriteRepository = customerWriteRepository;
-            _orderWriteRepository = orderWriteRepository;
-            _orderReadRepository = orderReadRepository;
         }
 
-        //[HttpGet("a")]
-        //public async Task Save()
-        //{
-        //    await _productWriteRepository.AddRangeAsync(new()
-        //    {
-        //        new() { Id = Guid.NewGuid(), Name = "Product 1", CreateDate = DateTime.UtcNow, Price = 100, Stock = 49 },
-        //        new() { Id = Guid.NewGuid(), Name = "Product 2", CreateDate = DateTime.UtcNow, Price = 200, Stock = 21 },
-        //        new() { Id = Guid.NewGuid(), Name = "Product 3", CreateDate = DateTime.UtcNow, Price = 40, Stock = 13 },
-        //    });
-        //    await _productWriteRepository.SaveAsync();
-
-        //}
-
         [HttpGet]
-        public async Task Get()
+        public IActionResult GetAll()
         {
-            var order = await _orderReadRepository.GetByIdAsync("070d1bde-b6a6-4553-a680-ec250bc4366d");
-            order.Address = "Çankırı";
-            await _orderWriteRepository.SaveAsync();
+            return Ok(_productReadRepository.GetAll());
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            return Ok(await _productReadRepository.GetByIdAsync(id));
+        }    
+
+        [HttpPost]
+        public async Task<IActionResult> Post(VM_Create_Product model)
+        {
+            await _productWriteRepository.AddAsync(new()
+            {
+                Name = model.Name,
+                Price = model.Price,
+                Stock = model.Stock,
+            });
+
+            return StatusCode((int)HttpStatusCode.Created);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(VM_Update_Product model)
+        {
+            Product product = await _productReadRepository.GetByIdAsync(model.Id);
+            product.Stock = model.Stock;
+            product.Name = model.Name;
+            product.Price = model.Price;
+            await _productWriteRepository.SaveAsync();
+            return StatusCode((int)HttpStatusCode.OK);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await _productWriteRepository.RemoveAsync(id);
+            await _productWriteRepository.SaveAsync();
+            return StatusCode((int)HttpStatusCode.OK);
         }
     }
 }
