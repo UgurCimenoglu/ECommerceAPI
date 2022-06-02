@@ -27,13 +27,13 @@ namespace ECommerceAPI.WebAPI.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(_productReadRepository.GetAll());
+            return Ok(_productReadRepository.GetAll(false));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            return Ok(await _productReadRepository.GetByIdAsync(id));
+            return Ok(await _productReadRepository.GetByIdAsync(id,false));
         }    
 
         [HttpPost]
@@ -41,11 +41,11 @@ namespace ECommerceAPI.WebAPI.Controllers
         {
             await _productWriteRepository.AddAsync(new()
             {
-                Name = model.Name,
+                Name = model.Name,  
                 Price = model.Price,
                 Stock = model.Stock,
             });
-
+            await _productWriteRepository.SaveAsync();
             return StatusCode((int)HttpStatusCode.Created);
         }
 
